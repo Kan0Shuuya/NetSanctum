@@ -1,13 +1,15 @@
-version: '3.8'
+x-common-env: &common-env
+  ENABLE_NGINX_AUTH: 1
 
 services:
   web:
     build: .
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
-      - FLASK_ENV=development
-      - DATABASE_URL=postgresql://postgres:example@db:5432/postgres
+      <<: *common-env
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://postgres:example@db:5432/postgres
     depends_on:
       - db
 
@@ -17,6 +19,17 @@ services:
       POSTGRES_PASSWORD: example
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  nginx:
+    build: ./nginx
+    environment:
+      <<: *common-env
+      HTPASSWD_USER: ${HTPASSWD_USER}
+      HTPASSWD_PASS: ${HTPASSWD_PASS}
+    ports:
+      - "80:80"
+    depends_on:
+      - web
 
 volumes:
   pgdata:
