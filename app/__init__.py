@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 
 def create_app():
     app = Flask(__name__)
@@ -7,6 +7,6 @@ def create_app():
     
     @app.route('/')
     def main_page():
-        return 'HELLO, MAIN PAGE'
+        return render_template('index.html')
     
     return app

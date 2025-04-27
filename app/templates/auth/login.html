@@ -1,11 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>NetSanctum - Доступ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Переменные для удобства */
+        :root {
+            --bg-color: #0a0f18; /* Глубокий темно-синий/черный фон */
+            --primary-cyan: #00e5ff; /* Яркий неоновый циан */
+            --secondary-cyan: #00a2ff; /* Чуть темнее циан для акцентов */
+            --accent-yellow: #ffdd00; /* Яркий желтый для фокуса/hover */
+            --text-color: #e0f2f7; /* Светло-голубой текст */
+            --label-color: rgba(0, 229, 255, 0.6); /* Полупрозрачный циан для меток */
+            --container-bg: rgba(10, 25, 47, 0.7); /* Фон контейнера */
+            --border-glow: rgba(0, 229, 255, 0.3); /* Цвет свечения рамки */
+            --input-border: rgba(0, 162, 255, 0.4); /* Цвет рамки инпута по умолчанию */
+        }
+
+        /* Основные стили и сброс */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #000000 100%); /* Градиентный фон */
+            color: var(--text-color);
+            overflow: hidden;
+            position: relative; /* Для фоновых элементов, если понадобятся */
+        }
+
+        /* Контейнер формы */
+        .login-container {
+            position: relative;
+            background: var(--container-bg);
+            padding: 40px 50px;
+            border-radius: 12px; /* Слегка скругленные углы */
+            border: 1px solid rgba(0, 229, 255, 0.15); /* Едва заметная граница */
+            box-shadow:
+                0 0 25px var(--border-glow), /* Основное свечение */
+                0 0 50px rgba(0, 0, 0, 0.5); /* Тень для объема */
+            backdrop-filter: blur(8px); /* Эффект стекла */
+            width: 700px;
+            max-width: 95%;
+            z-index: 1;
+            text-align: center;
+        }
+
+        /* Заголовок */
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-cyan);
+            margin-bottom: 40px;
+            font-weight: 700;
+            font-size: 2.5em;
+            text-shadow:
+                0 0 5px var(--primary-cyan),
+                0 0 10px var(--primary-cyan),
+                0 0 15px rgba(0, 229, 255, 0.5); /* Усиленное свечение */
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Группа ввода */
+        .input-group {
+            position: relative;
+            margin-bottom: 35px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 10px 12px 10px; /* Добавил отступ справа для иконки */
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--input-border); /* Тонкая рамка снизу */
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 400;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Метка */
+        .input-group label {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            color: var(--label-color);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 0;
+        }
+
+        .input-group input:focus + label,
+        .input-group input:not(:placeholder-shown) + label { /* Используем :not(:placeholder-shown) для срабатывания при наличии текста */
+            top: -15px;
+            left: 0;
+            font-size: 12px;
+            color: var(--accent-yellow); /* Желтый при активации */
+            font-weight: 400;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: var(--accent-yellow); /* Желтая рамка при фокусе */
+            box-shadow: 0 2px 8px -2px rgba(255, 221, 0, 0.4); /* Желтое свечение под рамкой */
+        }
+
+        /* Чтобы placeholder не мешал label */
+        .input-group input::placeholder {
+            color: transparent;
+            user-select: none;
+        }
+
+        /* Кнопка входа */
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-cyan); /* Циановый фон */
+            border: none;
+            border-radius: 8px; /* Соответствует контейнеру */
+            color: var(--bg-color); /* Темный текст */
+            font-size: 16px;
+            font-weight: 700; /* Жирнее */
+            font-family: 'Orbitron', sans-serif; /* Тот же шрифт, что и у заголовка */
+            cursor: pointer;
+            margin-top: 25px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); /* Свечение кнопки */
+        }
+
+        .btn-login:hover {
+            background-color: var(--accent-yellow); /* Желтый фон при наведении */
+            color: #000; /* Черный текст */
+            box-shadow: 0 0 20px rgba(255, 221, 0, 0.6); /* Желтое свечение */
+            transform: translateY(-2px); /* Легкий подъем */
+        }
+
+        .btn-login:active {
+            transform: translateY(0); /* Возврат при нажатии */
+            box-shadow: 0 0 10px rgba(255, 221, 0, 0.4);
+        }
+
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 700px) {
+            .NetSanctum{
+                opacity: .0;
+            }
+            .login-container {
+                padding: 30px 25px;
+                width: 90%;
+            }
+            h1 {
+                font-size: 2em;
+                margin-bottom: 30px;
+            }
+            .btn-login {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .input-group {
+                margin-bottom: 30px;
+            }
+        }
+
+    </style>
 </head>
 <body>
-    <h1>HAHAHAH</h1>
+    <div class="login-container">
+        <h1 class="NetSanctum">NetSanctum</h1>
+        <form action="#" method="post">
+            <div class="input-group">
+                <input type="text" id="username" name="username" required placeholder=" ">
+                <label for="username">Username</label>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" name="password" required placeholder=" ">
+                <label for="password">Password</label>            
+            </div>
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+    </div>
+
 </body>
 </html>
