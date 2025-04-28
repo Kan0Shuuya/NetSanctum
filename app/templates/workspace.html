@@ -175,17 +175,15 @@
   <button class="menu-btn" id="menuToggle" title="Меню">
     <span></span>
   </button>
-  <div class="overlay" id="overlay"></div>
+  {% block overall %} {% endblock %}
 
   <div class="sidebar" id="sidebar">
     {%for module in modules%}
-        <a class="nav-btn" href="{{module.href}}">{{module.name}}</a>
+        <a class="nav-btn" href="{{module.href}}">{{module.emoji}} {{module.name}}</a>
     {% endfor %}
   </div>
 
-  <div class="main-content">
-    <h1>Привет пользователь! Как ваш день?</h1>
-  </div>
+  
 
 <script>
   const menuToggle = document.getElementById('menuToggle');
