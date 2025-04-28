@@ -1,0 +1,5 @@
+{
+    "name": "📒 Заметки",
+    "route_prefix": "/notes",
+    "version": "0.1"
+}
