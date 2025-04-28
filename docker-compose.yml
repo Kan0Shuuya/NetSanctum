@@ -5,7 +5,7 @@ services:
   web:
     build: .
     expose:
-      - "5000"
+      - "4000"
     environment:
       <<: *common-env
       FLASK_ENV: development
@@ -13,7 +13,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./migrations:/migrations
+      - ./migrations:/app/migrations
 
   db:
     image: postgres
