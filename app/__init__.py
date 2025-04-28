@@ -6,6 +6,7 @@ from flask import Flask, abort, redirect, render_template, current_app, request,
 
 def create_app():
     app = Flask(__name__)
+    module_list = []
     modules_dir = os.path.join(os.path.dirname(__file__), 'modules')
     for module_folder in os.listdir(modules_dir):
         full_path = os.path.join(modules_dir, module_folder)
@@ -18,22 +19,23 @@ def create_app():
                     py_mod = importlib.import_module(f"app.modules.{module_folder}")
                     if hasattr(py_mod, 'bp'):
                         app.register_blueprint(py_mod.bp, url_prefix=meta.get('route_prefix'))
+                        module_list.append({
+                            "emoji": f"{meta.get('emoji')}",
+                            "name": f"{meta.get('name')}",
+                            "href": f"{meta.get('route_prefix')}"
+                        })
                     else:
                         print("EROR! not found bp attr in module!")                    
-                    
             else:
-                print(f"EROR! can't export {info_json}")
-
-                
-                
-        
+                print(f"EROR! can't export {info_json}")        
         else:
-            print(f"EROR! {full_path} is not dir")            
+            print(f"EROR! {full_path} is not dir")   
+        app.config['MODULES'] = module_list         
             
     
     
     @app.route('/')
     def index():
-       return render_template('workspace.html')
+       return render_template('workspace.html', modules=current_app.config.get('MODULES', []))
         
     return app
