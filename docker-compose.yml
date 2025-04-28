@@ -9,14 +9,17 @@ services:
     environment:
       <<: *common-env
       FLASK_ENV: development
-      DATABASE_URL: postgresql://postgres:example@db:5432/postgres
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
     depends_on:
       - db
+    volumes:
+      - ./migrations:/migrations
 
   db:
     image: postgres
+
     environment:
-      POSTGRES_PASSWORD: example
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
     volumes:
       - pgdata:/var/lib/postgresql/data
 

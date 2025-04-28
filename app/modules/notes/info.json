@@ -2,5 +2,6 @@
     "emoji": "📒",
     "name": "Заметки",
     "route_prefix": "/notes",
-    "version": "0.1"
+    "version": "0.1",
+    "title": "Заметки"
 }

@@ -2,215 +2,152 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Выбор блока</title>
+  <title>{{ module.title }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
-      --bg-color: #10191e;
-      --accent1: #19a2ae;
-      --accent2: #4682a9;
-      --text-color: #f0f6fc;
-      --menu-width: 230px;
-      --menu-bg: #15232d;
-      --button-bg: #182f36;
-      --button-hover: #22627c;
+      --transition: 0.33s cubic-bezier(.85,.22,.29,.98);
     }
-
     body {
       margin: 0;
       font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
+      background: #10191e;
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    /* Hamburger button */
-    .menu-btn {
+    /* Панель сверху */
+    .top-panel {
       position: fixed;
-      top: 24px;
-      left: 24px;
-      z-index: 1002;
-      width: 48px;
-      height: 48px;
-      background: var(--button-bg);
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
+      left: 0; top: 0; width: 100vw;
+      background: #15232d;
+      box-shadow: 0 8px 26px 1px rgba(30,40,66,0.19);
+      border-radius: 0 0 16px 16px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      box-shadow: 0 2px 12px 0 rgba(30,40,65,0.2);
-      transition: background 0.2s;
-    }
-    .menu-btn:hover {
-      background: var(--button-hover);
-    }
-    .menu-btn span {
-      display: block;
-      width: 28px;
-      height: 3px;
-      background: var(--accent1);
-      border-radius: 2px;
-      transition: 0.3s;
-      position: relative;
-    }
-    .menu-btn span::before,
-    .menu-btn span::after {
-      content: "";
-      position: absolute;
-      width: 28px;
-      height: 3px;
-      background: var(--accent1);
-      border-radius: 2px;
-      left: 0;
-      transition: 0.3s;
-    }
-    .menu-btn span::before {
-      top: -9px;
-    }
-    .menu-btn span::after {
-      bottom: -9px;
-    }
-    .menu-btn.open span {
-      background: transparent;
-    }
-    .menu-btn.open span::before {
-      transform: translateY(9px) rotate(45deg);
-    }
-    .menu-btn.open span::after {
-      transform: translateY(-9px) rotate(-45deg);
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: var(--menu-width);
-      height: 100vh;
-      background: var(--menu-bg);
-      box-shadow: 2px 0 14px rgba(0,0,0,0.18);
-      transform: translateX(-110%);
-      transition: transform 0.3s cubic-bezier(.85,.22,.29,.98);
-      z-index: 1001;
-      display: flex;
-      flex-direction: column;
-      padding-top: 74px;
-    }
-    .sidebar.open {
-      transform: translateX(0);
-    }
-
-    .sidebar .nav-btn {
-      margin: 0 16px 16px 20px;
-      font-size: 1.1em;
-      background: var(--button-bg);
-      color: var(--text-color);
-      border: none;
-      border-radius: 8px;
-      padding: 12px 28px;
-      text-align: left;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-      outline: none;
-    }
-    .sidebar .nav-btn:hover,
-    .sidebar .nav-btn.active {
-      background: var(--accent1);
-      color: #fff;
-    }
-
-    /* Overlay */
-    .overlay {
-      position: fixed;
-      top: 0; left: 0; right:0; bottom:0;
-      background: rgba(0,0,0,0.35);
-      z-index: 1000;
+      gap: 16px;
+      height: var(--panel-height);
+      padding: 21px 38px 24px 38px;
+      transform: translateY(-100%);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s;
+      transition: transform var(--transition), opacity 0.25s;
+      z-index: 1002;
     }
-    .overlay.open {
+    .top-panel.open {
+      transform: translateY(0);
       opacity: 1;
       pointer-events: auto;
     }
+    .top-panel .mod-btn {
+      background: none;
+      border: none;
+      color: #19a2ae;
+      font-size: 1.04em;
+      padding: 15px 18px;
+      border-radius: 10px;
+      transition: background 0.13s, color 0.15s;
+      cursor: pointer;
+    }
+    .top-panel .mod-btn:hover {
+      background: #19a2ae;
+      color: #fff;
+    }
 
-    /* Main Content */
-    .main-content {
-      padding: 60px 32px 32px 32px;
-      margin-left: 0;
-      transition: filter 0.2s;
-      min-height: 100vh;
-      max-width: 800px;
-      margin: 0 auto;
+    /* Мини-стрелка */
+    .arrow-container {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1003;
+      transition: top var(--transition);
+      width: 34px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: auto;
+    }
+    .arrow-btn {
+      background: rgba(40,60,80,.49);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px 1px rgba(40,60,80,0.12);
+      width: 29px; height: 29px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.63;
+      transition: background 0.2s, opacity 0.17s, transform 0.22s;
+      font-size: 1.15em;
+      color: #19a2ae;
+      outline: none;
+    }
+    .arrow-btn:hover { opacity: 0.93; background: #14526d; color: #fff }
+    .arrow-icon {
+      transition: transform 0.23s;
+      font-size: 1.16em;
+      pointer-events: none;
+      user-select: none;
+    }
+    /* При открытии панели */
+    .panel-open ~ .arrow-container {
+      top: var(--panel-height);
+    }
+    .arrow-container {
+      top: 6px;
+    }
+    .arrow-btn[aria-expanded="true"] .arrow-icon {
+      transform: rotate(180deg);
+    }
+
+    main {
+      margin-top: 65px;
+      padding: 22px;
     }
     @media (max-width: 500px) {
-      .main-content {
-        padding: 36px 8px 8px 8px;
-      }
-      .menu-btn {
-        left: 10px;
-        top: 10px;
-      }
-      .sidebar {
-        width: 80vw;
-        min-width: 160px;
-        max-width: 300px;
-      }
+      .top-panel {padding: 9px 2vw 14px 2vw; gap: 8px;}
+      .top-panel .mod-btn {padding: 8px 7px; font-size: 0.95em;}
+      .arrow-container { width: 32px; height: 24px;}
+      .arrow-btn { width: 25px; height: 25px; }
     }
-    h1 {
-      color: var(--accent2);
-      font-weight: 700;
-      letter-spacing: 2px;
-      margin-bottom: 38px;
-      font-size: 2.2em;
-      text-align: center;
-    }
-
   </style>
 </head>
 <body>
-
-  <button class="menu-btn" id="menuToggle" title="Меню">
-    <span></span>
-  </button>
-  {% block overall %} {% endblock %}
-
-  <div class="sidebar" id="sidebar">
-    {%for module in modules%}
-        <a class="nav-btn" href="{{module.href}}">{{module.emoji}} {{module.name}}</a>
+  <div class="top-panel" id="topPanel">
+    {% for module in modules %}
+      <a class="mod-btn" href="{{ module.href }}">{{ module.emoji }} {{ module.name }}</a>
     {% endfor %}
   </div>
-
-  
-
+  <div class="arrow-container" id="arrowContainer">
+    <button class="arrow-btn" id="panelToggle" aria-expanded="false" title="Меню">
+      <span class="arrow-icon">&#9660;</span>
+    </button>
+  </div>
+  <main>
+    {% block overall %}{% endblock %}
+  </main>
 <script>
-  const menuToggle = document.getElementById('menuToggle');
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
-  const navBtns = document.querySelectorAll('.nav-btn');
+  const panel = document.getElementById('topPanel');
+  const arrowContainer = document.getElementById('arrowContainer');
+  const arrowBtn = document.getElementById('panelToggle');
+  let open = false;
 
-  menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
-    menuToggle.classList.toggle('open');
-  });
-  overlay.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('open');
-    menuToggle.classList.remove('open');
-  });
+  function setPanel(openNow) {
+    open = openNow;
+    if (open) {
+      panel.classList.add('open');
+      document.body.classList.add('panel-open');
+      arrowBtn.setAttribute("aria-expanded", "true");
+    } else {
+      panel.classList.remove('open');
+      document.body.classList.remove('panel-open');
+      arrowBtn.setAttribute("aria-expanded", "false");
+    }
+  }
 
+  arrowBtn.addEventListener('click', () => setPanel(!open));
 
-  navBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      navBtns.forEach(b=>b.classList.remove('active'));
-      this.classList.add('active');
-      sidebar.classList.remove('open');
-      overlay.classList.remove('open');
-      menuToggle.classList.remove('open');
-    });
+  document.body.addEventListener('mousedown', e => {
+    if (open && !panel.contains(e.target) && !arrowContainer.contains(e.target)) {
+      setPanel(false);
+    }
   });
 </script>
 </body>
