@@ -14,7 +14,6 @@
       background: #10191e;
       min-height: 100vh;
     }
-
     /* Панель сверху */
     .top-panel {
       position: fixed;
@@ -26,8 +25,7 @@
       align-items: flex-start;
       justify-content: center;
       gap: 16px;
-      height: var(--panel-height);
-      padding: 21px 38px 24px 38px;
+      height: var(--panel-height, 64px);
       transform: translateY(-100%);
       opacity: 0;
       pointer-events: none;
@@ -53,7 +51,6 @@
       background: #19a2ae;
       color: #fff;
     }
-
     /* Мини-стрелка */
     .arrow-container {
       position: fixed;
@@ -63,6 +60,14 @@
       transition: top var(--transition);
       width: 34px; height: 28px;
       display: flex; align-items: center; justify-content: center;
+      pointer-events: auto;
+      top: 6px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .arrow-container.arrow-visible {
+      opacity: 1;
       pointer-events: auto;
     }
     .arrow-btn {
@@ -86,17 +91,10 @@
       pointer-events: none;
       user-select: none;
     }
-    /* При открытии панели */
-    .panel-open ~ .arrow-container {
-      top: var(--panel-height);
-    }
-    .arrow-container {
-      top: 6px;
-    }
+    .panel-open #arrowContainer { display: none; }
     .arrow-btn[aria-expanded="true"] .arrow-icon {
       transform: rotate(180deg);
     }
-
     main {
       margin-top: 65px;
       padding: 22px;
@@ -128,6 +126,18 @@
   const arrowContainer = document.getElementById('arrowContainer');
   const arrowBtn = document.getElementById('panelToggle');
   let open = false;
+
+  document.addEventListener("mousemove", (e) => {
+    if (document.body.classList.contains('panel-open')) {
+      arrowContainer.classList.remove('arrow-visible');
+      return;
+    }
+    if (e.clientY <= window.innerHeight * 0.05) {
+      arrowContainer.classList.add('arrow-visible');
+    } else {
+      arrowContainer.classList.remove('arrow-visible');
+    }
+  });
 
   function setPanel(openNow) {
     open = openNow;

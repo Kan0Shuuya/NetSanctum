@@ -1,4 +1,219 @@
 {% extends "workspace.html"%}
 {% block overall %}
+  <style>
+    :root {
+      --menu-width: 230px;
+      --menu-bg: #15232d;
+      --button-bg: #182f36;
+      --button-hover: #22627c;
+      --accent1: #19a2ae;
+      --text-color: #f0f6fc;
+    }
+    .menu-btn {
+      position: fixed; top: 24px; left: 24px; z-index: 1003;
+      width: 48px; height: 48px;
+      background: var(--button-bg); border: none; border-radius: 12px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 12px 0 rgba(30,40,65,0.2);
+      transition: background 0.2s;
+    }
+    .menu-btn:hover { background: var(--button-hover); }
+    .menu-btn span {
+      display: block; width: 28px; height: 3px;
+      background: var(--accent1); border-radius: 2px;
+      transition: 0.3s;
+      position: relative;
+    }
+    .menu-btn span::before,
+    .menu-btn span::after {
+      content: ""; position: absolute; width: 28px; height: 3px;
+      background: var(--accent1); border-radius: 2px; left: 0;
+      transition: 0.3s;
+    }
+    .menu-btn span::before { top: -9px; }
+    .menu-btn span::after { bottom: -9px; }
+    .menu-btn.open span { background: transparent; }
+    .menu-btn.open span::before { transform: translateY(9px) rotate(45deg);}
+    .menu-btn.open span::after { transform: translateY(-9px) rotate(-45deg);}
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: var(--menu-width);
+      height: 100vh; background: var(--menu-bg);
+      box-shadow: 2px 0 14px rgba(0,0,0,0.18);
+      transform: translateX(-110%);
+      transition: transform 0.3s cubic-bezier(.85,.22,.29,.98);
+      z-index: 1002;
+      display: flex; flex-direction: column; padding-top: 74px;
+      overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0);}
+    .sidebar .tree-node { color: var(--text-color); }
+    .sidebar .tree-folder {
+      cursor: pointer;
+      font-weight: bold;
+      position: relative;
+      margin-left: 12px;
+    }
+    .sidebar .tree-folder .tree-arrow {
+      display: inline-block;
+      transition: 0.20s;
+      font-size: 0.9em;
+      margin-right: 6px;
+    }
+    .sidebar .tree-folder.collapsed .tree-arrow { transform: rotate(-90deg);}
+    .sidebar .tree-children {
+      margin-left: 16px;
+      border-left: 1px dashed rgba(25,162,174,.2);
+      padding-left: 8px;
+      margin-top:5px;
+    }
+    #folder-tree {
+      padding-right: 10px;
+      padding-left: 5px;
+      padding-top: 10px;
+    }
+    .sidebar .tree-file {
+      margin-left: 12px;
+      font-size: 1em;
+      border-radius: 6px;
+      padding: 7px 18px;
+      color: var(--text-color);
+      display: block;
+      text-decoration: none;
+      cursor: pointer;
+      background: var(--button-bg);
+      margin-bottom: 4px;
+      transition: background .19s;
+    }
+    .sidebar .tree-file:hover, .sidebar .tree-file.active {
+      background: var(--accent1);
+      color: #fff;
+    }
+    .sidebar .tree-folder.collapsed > .tree-children {
+      display: none;
+    }
+    .sidebar .tree-folder { margin-bottom: 6px;}
+    .sidebar .tree-folder .tree-arrow {
+      width: 1em; display: inline-block; vertical-align: middle;
+    }
+    .overlay {
+      position: fixed; top: 0; left: 0; right:0; bottom:0;
+      background: rgba(0,0,0,0.35); z-index: 1001;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .overlay.open {
+      opacity: 1; pointer-events: auto;
+    }
+    @media (max-width: 500px) {
+      .menu-btn { left: 10px; top: 10px;}
+      .sidebar {
+        width: 80vw; min-width: 160px; max-width: 300px;
+      }
+    }
+  </style>
+  <button class="menu-btn" id="menuToggle" title="Меню"><span></span></button>
+  <div class="overlay" id="overlay"></div>
+  <div class="sidebar" id="sidebar">
+    <div id="folder-tree"></div>
+  </div>
   <h1>Страница заметок</h1>
+
+  <!-- Передаём объект прямо в JS! -->
+  <script>
+    // folders -- это переменная python (dict), сериализуем в js
+    const folderData = {{ folders|tojson }};
+  </script>
+  <script>
+    // ----------- Hamburger/menu logic -----------
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+      menuToggle.classList.toggle('open');
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+      menuToggle.classList.remove('open');
+    });
+
+
+    // ----------- TREE RENDER LOGIC -----------
+    function renderTree(node, name) {
+      const frag = document.createDocumentFragment();
+
+      // Рендер файлов
+      if (node['files-in-dir'] && node['files-in-dir'].length > 0) {
+        for (const file of node['files-in-dir']) {
+          const fileEl = document.createElement('a');
+          fileEl.textContent = file;
+          fileEl.className = 'tree-file nav-btn';
+          fileEl.dataset.filepath = (name === '.' ? '' : name + '/') + file;
+          fileEl.href = '#';
+          frag.appendChild(fileEl);
+        }
+      }
+
+      // Рендер папок
+      if (node['folders']) {
+        for (const subfolder in node['folders']) {
+          const folderNode = node['folders'][subfolder];
+
+          const folderWrap = document.createElement('div');
+          folderWrap.className = 'tree-node tree-folder open';
+
+          // folder label с arrow
+          const folderHeader = document.createElement('div');
+          folderHeader.className = 'tree-folder-label';
+          const arrow = document.createElement('span');
+          arrow.className = 'tree-arrow';
+          arrow.innerHTML = '&#9654;';
+          folderHeader.appendChild(arrow);
+
+          const folderTitle = document.createElement('span');
+          folderTitle.appendChild(document.createTextNode(subfolder));
+          folderHeader.appendChild(folderTitle);
+          folderWrap.appendChild(folderHeader);
+
+          // дети (рекурсивно)
+          const children = document.createElement('div');
+          children.className = 'tree-children';
+          children.appendChild(renderTree(folderNode, (name === '.' ? subfolder : name + '/' + subfolder)));
+          folderWrap.appendChild(children);
+
+          // сворачивать/разворачивать по клику на label
+          folderHeader.addEventListener('click', function(e){
+            folderWrap.classList.toggle('collapsed');
+            folderWrap.classList.toggle('open');
+            e.stopPropagation();
+          });
+
+          frag.appendChild(folderWrap);
+        }
+      }
+      return frag;
+    }
+
+    // Render
+    const treeContainer = document.getElementById('folder-tree');
+    treeContainer.appendChild( renderTree(folderData['.'], '.') );
+
+    // Логика активной кнопки
+    treeContainer.addEventListener('click', function(e){
+      if (e.target.classList.contains('tree-file')) {
+        document.querySelectorAll('.tree-file').forEach(el=>el.classList.remove('active'));
+        e.target.classList.add('active');
+        e.preventDefault();
+      }
+    });
+
+
+    const all_tree_file = document.getElementsByClassName("tree-file")
+
+    all_tree_file.addEventListener('click', function(e){
+      fetch()
+
+    })
+  </script>
 {% endblock %}

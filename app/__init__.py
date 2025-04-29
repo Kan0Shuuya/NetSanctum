@@ -22,7 +22,7 @@ def create_app():
         if os.path.isdir(full_path):
             info_json = os.path.join(full_path, "info.json")
             if os.path.exists(info_json):
-                print("Import {info_json}...")
+                print(f"Import {info_json}...")
                 with open(info_json, encoding="utf-8") as file:
                     meta = json.load(file)
                     py_mod = importlib.import_module(f"app.modules.{module_folder}")
